@@ -1,0 +1,13 @@
+{
+  "name": "westpac-balance-scraper",
+  "version": "1.0.0",
+  "description": "Express server that scrapes Westpac AU account balances",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node start.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "puppeteer": "^5.5.0"
+  }
+}
