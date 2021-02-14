@@ -6,11 +6,15 @@ const puppeteer = require('puppeteer');
 const { PASSWORD, PORT, USERNAME } = process.env;
 
 // constants
+const ACCOUNT_SELECTOR = '.widget.accounts-dashboardaccountwidget';
 const BALANCE_SELECTOR = '.CurrentBalance:not(.a11y-context)';
+const NAME_SELECTOR = 'h2';
 
 const app = express();
 
 app.get('/', async (req, res) => {
+  console.log('request');
+
   let browser;
 
   try {
@@ -30,21 +34,24 @@ app.get('/', async (req, res) => {
     await page.click('#signin');
 
 
-    // wait for balances screen to load
+    // wait for accounts screen to load
     await page.waitForSelector(BALANCE_SELECTOR);
 
-    // scrape balances
-    const balances = await page.evaluate((balanceSelector) => {
-      return Array.from(document.querySelectorAll(balanceSelector)).map((node) => node.innerText.match(/^\$(\d*\.\d{2})/)[1]);
-    }, BALANCE_SELECTOR);
+    // scrape accounts
+    const accounts = await page.evaluate((accountSelector, balanceSelector, nameSelector) => {
+      return Array.from(document.querySelectorAll(accountSelector)).map((node) => ({
+        name: node.querySelector(nameSelector).innerText,
+        balance: node.querySelector(balanceSelector).innerText.match(/^\$(\d*\.\d{2})/)[1]
+      }));
+    }, ACCOUNT_SELECTOR, BALANCE_SELECTOR, NAME_SELECTOR);
 
     res.json({
-      balances
+      accounts
     });
 
-    console.log('fetched balances');
+    console.log('fetched accounts');
   } catch (error) {
-    console.error('error while fetching balances', {
+    console.error('error while fetching accounts', {
       error
     });
     res.sendStatus(500);
