@@ -1,4 +1,5 @@
 // third party libraries
+const bodyParser = require('body-parser');
 const express = require('express');
 const puppeteer = require('puppeteer');
 
@@ -11,9 +12,22 @@ const BALANCE_SELECTOR = '.CurrentBalance:not(.a11y-context)';
 const NAME_SELECTOR = 'h2';
 
 const app = express();
+const needCredsInRequest = !(USERNAME && PASSWORD);
 
-app.get('/', async (req, res) => {
-  console.log('request');
+app.use(bodyParser.json());
+
+app.post('/', async (req, res) => {
+  const { password, username } = req.body;
+  const hasCreds = !!(username && password);
+  console.log('request', {
+    hasCreds,
+    needCredsInRequest
+  });
+
+  if (needCredsInRequest && !hasCreds) {
+    res.sendStatus(400);
+    return;
+  }
 
   let browser;
 
@@ -27,10 +41,10 @@ app.get('/', async (req, res) => {
     // sign in
     await page.evaluate((username) => {
       document.getElementById('username').value = username;
-    }, USERNAME);
+    }, hasCreds ? username : USERNAME);
     await page.evaluate((password) => {
       document.getElementById('password').value = password;
-    }, PASSWORD);
+    }, hasCreds ? password : PASSWORD);
     await page.click('#signin');
 
 
