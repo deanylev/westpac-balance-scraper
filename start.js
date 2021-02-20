@@ -4,7 +4,7 @@ const express = require('express');
 const puppeteer = require('puppeteer');
 
 // env vars
-const { PASSWORD, PORT, USERNAME } = process.env;
+const { PASSWORD, PORT, PUPPETEER_ARGS, PUPPETEER_EXEC_PATH, USERNAME } = process.env;
 
 // constants
 const ACCOUNT_SELECTOR = '.widget.accounts-dashboardaccountwidget';
@@ -32,7 +32,14 @@ app.post('/', async (req, res) => {
   let browser;
 
   try {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({
+      ...PUPPETEER_EXEC_PATH && {
+        executablePath: PUPPETEER_EXEC_PATH
+      },
+      ...PUPPETEER_ARGS && {
+        args: PUPPETEER_ARGS.split(',')
+      }
+    });
     const page = await browser.newPage();
 
     // go to login page
