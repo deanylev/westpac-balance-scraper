@@ -62,7 +62,7 @@ app.post('/', async (req, res) => {
     const accounts = await page.evaluate((accountSelector, balanceSelector, nameSelector) => {
       return Array.from(document.querySelectorAll(accountSelector)).map((node) => ({
         name: node.querySelector(nameSelector).innerText,
-        balance: node.querySelector(balanceSelector).innerText.match(/^\$(\d*\.\d{2})/)[1]
+        balance: node.querySelector(balanceSelector).innerText.replace(/,/g, '').match(/^\$(\d*\.\d{2})/)[1]
       }));
     }, ACCOUNT_SELECTOR, BALANCE_SELECTOR, NAME_SELECTOR);
 
